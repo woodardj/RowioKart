@@ -106,9 +106,19 @@ class App {
         this.statusText.textContent = 'Connected to: ' + information.serialNumber;
         this.btOnOffSwitch.checked = true;
         return this.pm5.addEventListener('general-status', evt => {
+          console.log(evt);
+          console.log(evt.data);
+          // TODO: Update a rowing guy animation based on this info.
           const date = new Date(evt.data.timeElapsed * 1000);
           this.timeText.textContent = formatTime(date);
           this.distanceText.textContent = (evt.data.distance).toFixed(2);
+        });
+      })
+      .then(() => {
+        return this.pm5.addEventListener('stroke-data', evt => {
+          console.log(evt);
+          console.log(evt.data);
+          // TODO: Update a rowing guy animation based on this info.
         });
       })
       .then(() => {

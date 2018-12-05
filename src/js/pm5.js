@@ -51,6 +51,10 @@ const characteristics = {
       id: 'ce060031-43e5-11e4-916c-0800200c9a66',
       service: services.rowing
     },
+    strokeData: {
+      id: 'ce060035-43e5-11e4-916c-0800200c9a66',
+      service: services.rowing
+    },
     workoutEndSummary: {
       // id: 'ce060033-43e5-11e4-916c-0800200c9a66',
       id: 'ce060039-43e5-11e4-916c-0800200c9a66',
@@ -74,6 +78,9 @@ export default class PM5 {
     switch(type) {
       case 'general-status': {
         return this._addGeneralStatusListener();
+      }
+      case 'stroke-data': {
+        return this._addStrokeDataListener();
       }
       case 'workout-end': {
         return this._addWorkoutEndListener();
@@ -220,6 +227,28 @@ export default class PM5 {
       });
   }
 
+  /*
+    Data bytes packed as follows:
+    0: Elapsed Time Lo (0.01 sec lsb),
+    1: Elapsed Time Mid,
+    2: Elapsed Time High,
+    3: Distance Lo (0.1 m lsb),
+    4: Distance Mid,
+    5: Distance High,
+    6: Workout Type 3(enum), CSAFE_PM_GET_WORKOUTTYPE4
+    7: Interval Type5 (enum), CSAFE_PM_GET_INTERVALTYPE
+    8: Workout State (enum), CSAFE_PM_GET_WORKOUTSTATE
+    9: Rowing State (enum), CSAFE_PM_GET_ROWINGSTATE
+    10: Stroke State (enum), CSAFE_PM_GET_STROKESTATE
+    11: Total Work Distance Lo, CSAFE_PM_GET_WORKDISTANCE
+    12: Total Work Distance Mid,
+    13: Total Work Distance Hi,
+    14: Workout Duration Lo (if time, 0.01 sec lsb), CSAFE_PM_GET_WORKOUTDURA TION
+    15: Workout Duration Mid,
+    16: Workout Duration Hi,
+    17: Workout Duration Type (enum), CSAFE_PM_GET_WORKOUTDURA TION
+    18: Drag Factor CSAFE_PM_GET_DRAGFACTOR
+  */
   _addGeneralStatusListener() {
     return this._setupCharacteristicValueListener(
       characteristics.rowingService.generalStatus, (pm5, e) => {
@@ -228,17 +257,61 @@ export default class PM5 {
             + (valueArray[2] * HIGH_MULTIPLIER)) * 0.01;
         const distance = (valueArray[3] + (valueArray[4] * MID_MULTIPLIER)
             + (valueArray[5] * HIGH_MULTIPLIER)) * 0.1;
+        const workoutState = valueArray[8];
+        const strokeState = valueArray[10];
+        const dragFactor = valueArray[18];
         const event = {
           type: 'general-status',
           source: pm5,
           raw: e.target.value,
           data: {
             distance: distance,
-            timeElapsed: timeElapsed
+            timeElapsed: timeElapsed,
+            workoutState: workoutState,
+            strokeState: 
           }
         };
         pm5.eventTarget.dispatchEvent(event);
       });
+  }
+
+  /*
+    Data bytes packed as follows:
+    0: Elapsed Time Lo (0.01 sec lsb),
+    1: Elapsed Time Mid,
+    2: Elapsed Time High,
+    3: Distance Lo (0.1 m lsb),
+    4: Distance Mid,
+    5: Distance High,
+    6: Drive Length (0.01 meters, max = 2.55m), CSAFE_PM_GET_STROKESTATS
+    7: Drive Time (0.01 sec, max = 2.55 sec),
+    8: Stroke Recovery Time Lo (0.01 sec, max = 655.35 sec), CSAFE_PM_GET_STROKESTATS
+    9: Stroke Recovery Time Hi, CSAFE_PM_GET_STROKESTATS17
+    10: Stroke Distance Lo (0.01 m, max=655.35m), CSAFE_PM_GET_STROKESTATS
+    11: Stroke Distance Hi,
+    12: Peak Drive Force Lo (0.1 lbs of force, max=6553.5m), CSAFE_PM_GET_STROKESTATS
+    13: Peak Drive Force Hi,
+    14: Average Drive Force Lo (0.1 lbs of force, max=6553.5m), CSAFE_PM_GET_STROKESTATS
+    15: Average Drive Force Hi,
+    16: Stroke Count Lo, CSAFE_PM_GET_STROKESTATS
+    17: Stroke Count Hi,
+  */
+  _addStrokeDataListener() {
+    return this._setupCharacteristicValueListener(
+      characteristics.rowingService.strokeData, (pm5, e) => {
+        const valueArray = new Uint8Array(e.target.value.buffer);
+        // const ...info?
+        const event = {
+          type: 'stroke-data',
+          source: pm5,
+          raw: e.target.value,
+          data: {
+            // TODO
+          }
+        };
+        pm5.eventTarget.dispatchEvent(event);
+      }
+    )
   }
 
   _getStringCharacteristicValue(characteristic) {

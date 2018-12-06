@@ -51,6 +51,10 @@ const characteristics = {
       id: 'ce060031-43e5-11e4-916c-0800200c9a66',
       service: services.rowing
     },
+    dataRate: {
+      id: 'CE060034-43E5-11E4-916C-0800200C9A66',
+      service: services.rowing
+    }
     strokeData: {
       id: 'ce060035-43e5-11e4-916c-0800200c9a66',
       service: services.rowing
@@ -268,7 +272,8 @@ export default class PM5 {
             distance: distance,
             timeElapsed: timeElapsed,
             workoutState: workoutState,
-            strokeState: 
+            strokeState: strokeState,
+            dragFactor: dragFactor
           }
         };
         pm5.eventTarget.dispatchEvent(event);
@@ -286,15 +291,17 @@ export default class PM5 {
     6: Drive Length (0.01 meters, max = 2.55m), CSAFE_PM_GET_STROKESTATS
     7: Drive Time (0.01 sec, max = 2.55 sec),
     8: Stroke Recovery Time Lo (0.01 sec, max = 655.35 sec), CSAFE_PM_GET_STROKESTATS
-    9: Stroke Recovery Time Hi, CSAFE_PM_GET_STROKESTATS17
+    9: Stroke Recovery Time Hi, CSAFE_PM_GET_STROKESTATS8
     10: Stroke Distance Lo (0.01 m, max=655.35m), CSAFE_PM_GET_STROKESTATS
     11: Stroke Distance Hi,
     12: Peak Drive Force Lo (0.1 lbs of force, max=6553.5m), CSAFE_PM_GET_STROKESTATS
     13: Peak Drive Force Hi,
     14: Average Drive Force Lo (0.1 lbs of force, max=6553.5m), CSAFE_PM_GET_STROKESTATS
     15: Average Drive Force Hi,
-    16: Stroke Count Lo, CSAFE_PM_GET_STROKESTATS
-    17: Stroke Count Hi,
+    16: Work Per Stroke Lo (0.1 Joules, max=6553.5 Joules), CSAFE_PM_GET_STROKESTATS
+    17: Work Per Stroke Hi
+    18: Stroke Count Lo, CSAFE_PM_GET_STROKESTATS
+    19: Stroke Count Hi,
   */
   _addStrokeDataListener() {
     return this._setupCharacteristicValueListener(

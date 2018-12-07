@@ -75,6 +75,8 @@ class App {
     this.statusText = document.querySelector('#status');
     this.timeText = document.querySelector('#time');
     this.distanceText = document.querySelector('#distance');
+    this.strokeStateText = document.querySelector('#stroke-state');
+    this.peakDriveForceText = document.querySelector('#peak-power');
     this.fillLogbook();
 
     WebFont.load({
@@ -109,6 +111,7 @@ class App {
           console.log(evt);
           console.log(evt.data);
           // TODO: Update a rowing guy animation based on this info.
+          this.strokeStateText = evt.data.strokeState;
           const date = new Date(evt.data.timeElapsed * 1000);
           this.timeText.textContent = formatTime(date);
           this.distanceText.textContent = (evt.data.distance).toFixed(2);
@@ -119,6 +122,7 @@ class App {
           console.log(evt);
           console.log(evt.data);
           // TODO: Update a rowing guy animation based on this info.
+          this.peakDriveForceText = evt.data.peakDriveForce;
         });
       })
       .then(() => {

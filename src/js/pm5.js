@@ -54,7 +54,7 @@ const characteristics = {
     dataRate: {
       id: 'CE060034-43E5-11E4-916C-0800200C9A66',
       service: services.rowing
-    }
+    },
     strokeData: {
       id: 'ce060035-43e5-11e4-916c-0800200c9a66',
       service: services.rowing
@@ -231,36 +231,56 @@ export default class PM5 {
       });
   }
 
-  /*
-    Data bytes packed as follows:
-    0: Elapsed Time Lo (0.01 sec lsb),
-    1: Elapsed Time Mid,
-    2: Elapsed Time High,
-    3: Distance Lo (0.1 m lsb),
-    4: Distance Mid,
-    5: Distance High,
-    6: Workout Type 3(enum), CSAFE_PM_GET_WORKOUTTYPE4
-    7: Interval Type5 (enum), CSAFE_PM_GET_INTERVALTYPE
-    8: Workout State (enum), CSAFE_PM_GET_WORKOUTSTATE
-    9: Rowing State (enum), CSAFE_PM_GET_ROWINGSTATE
-    10: Stroke State (enum), CSAFE_PM_GET_STROKESTATE
-    11: Total Work Distance Lo, CSAFE_PM_GET_WORKDISTANCE
-    12: Total Work Distance Mid,
-    13: Total Work Distance Hi,
-    14: Workout Duration Lo (if time, 0.01 sec lsb), CSAFE_PM_GET_WORKOUTDURA TION
-    15: Workout Duration Mid,
-    16: Workout Duration Hi,
-    17: Workout Duration Type (enum), CSAFE_PM_GET_WORKOUTDURA TION
-    18: Drag Factor CSAFE_PM_GET_DRAGFACTOR
-  */
+  _parseGeneralStatusBuffer(buffer) {
+    /*
+      Data bytes packed as follows:
+      0: Elapsed Time Lo (0.01 sec lsb),
+      1: Elapsed Time Mid,
+      2: Elapsed Time High,
+      3: Distance Lo (0.1 m lsb),
+      4: Distance Mid,
+      5: Distance High,
+      6: Workout Type 3(enum), CSAFE_PM_GET_WORKOUTTYPE4
+      7: Interval Type5 (enum), CSAFE_PM_GET_INTERVALTYPE
+      8: Workout State (enum), CSAFE_PM_GET_WORKOUTSTATE
+      9: Rowing State (enum), CSAFE_PM_GET_ROWINGSTATE
+      10: Stroke State (enum), CSAFE_PM_GET_STROKESTATE
+      11: Total Work Distance Lo, CSAFE_PM_GET_WORKDISTANCE
+      12: Total Work Distance Mid,
+      13: Total Work Distance Hi,
+      14: Workout Duration Lo (if time, 0.01 sec lsb), CSAFE_PM_GET_WORKOUTDURA TION
+      15: Workout Duration Mid,
+      16: Workout Duration Hi,
+      17: Workout Duration Type (enum), CSAFE_PM_GET_WORKOUTDURA TION
+      18: Drag Factor CSAFE_PM_GET_DRAGFACTOR
+    */
+    const v = new Uint8Array(e.target.value.buffer);
+
+    return {
+      timeElapsed: this._byteBuilder(v[0], v[1], v[2]) * 0.01,
+      distance: this._byteBuilder(v[3], v[4], v[5]) * 0.1,
+      workoutType: v[6],
+      intervalType: v[7],
+      workoutState: v[8],
+      rowingState: v[9],
+      strokeState: v[10],
+      totalWorkDistance: this._byteBuilder(v[11], v[12], v[13]),
+      workoutDuration: this._byteBuilder(v[14], v[15], v[16]),
+      workoutDurationType: v[17],
+      dragFactor: v[18]
+    };
+  }
+
   _addGeneralStatusListener() {
     return this._setupCharacteristicValueListener(
       characteristics.rowingService.generalStatus, (pm5, e) => {
         const valueArray = new Uint8Array(e.target.value.buffer);
-        const timeElapsed = (valueArray[0] + (valueArray[1] * MID_MULTIPLIER)
-            + (valueArray[2] * HIGH_MULTIPLIER)) * 0.01;
-        const distance = (valueArray[3] + (valueArray[4] * MID_MULTIPLIER)
-            + (valueArray[5] * HIGH_MULTIPLIER)) * 0.1;
+        const timeElapsed = _byteBuilder(valueArray[0], valueArray[1], valueArray[2]) * 0.01;
+        const distance = _byteBuilder(valueArray[3], valueArray[4], valueArray[5]) * 0.1;
+        // const timeElapsed = (valueArray[0] + (valueArray[1] * MID_MULTIPLIER)
+        //     + (valueArray[2] * HIGH_MULTIPLIER)) * 0.01;
+        // const distance = (valueArray[3] + (valueArray[4] * MID_MULTIPLIER)
+        //     + (valueArray[5] * HIGH_MULTIPLIER)) * 0.1;
         const workoutState = valueArray[8];
         const strokeState = valueArray[10];
         const dragFactor = valueArray[18];
@@ -268,7 +288,8 @@ export default class PM5 {
           type: 'general-status',
           source: pm5,
           raw: e.target.value,
-          data: {
+          data: this._parseGeneralStatusBuffer(e.target.value.buffer),
+          oldData: {
             distance: distance,
             timeElapsed: timeElapsed,
             workoutState: workoutState,
@@ -280,45 +301,73 @@ export default class PM5 {
       });
   }
 
-  /*
-    Data bytes packed as follows:
-    0: Elapsed Time Lo (0.01 sec lsb),
-    1: Elapsed Time Mid,
-    2: Elapsed Time High,
-    3: Distance Lo (0.1 m lsb),
-    4: Distance Mid,
-    5: Distance High,
-    6: Drive Length (0.01 meters, max = 2.55m), CSAFE_PM_GET_STROKESTATS
-    7: Drive Time (0.01 sec, max = 2.55 sec),
-    8: Stroke Recovery Time Lo (0.01 sec, max = 655.35 sec), CSAFE_PM_GET_STROKESTATS
-    9: Stroke Recovery Time Hi, CSAFE_PM_GET_STROKESTATS8
-    10: Stroke Distance Lo (0.01 m, max=655.35m), CSAFE_PM_GET_STROKESTATS
-    11: Stroke Distance Hi,
-    12: Peak Drive Force Lo (0.1 lbs of force, max=6553.5m), CSAFE_PM_GET_STROKESTATS
-    13: Peak Drive Force Hi,
-    14: Average Drive Force Lo (0.1 lbs of force, max=6553.5m), CSAFE_PM_GET_STROKESTATS
-    15: Average Drive Force Hi,
-    16: Work Per Stroke Lo (0.1 Joules, max=6553.5 Joules), CSAFE_PM_GET_STROKESTATS
-    17: Work Per Stroke Hi
-    18: Stroke Count Lo, CSAFE_PM_GET_STROKESTATS
-    19: Stroke Count Hi,
-  */
+  _parseStrokeDataBuffer(buffer) {
+    /*
+      Data bytes packed as follows:
+      0: Elapsed Time Lo (0.01 sec lsb),
+      1: Elapsed Time Mid,
+      2: Elapsed Time High,
+      3: Distance Lo (0.1 m lsb),
+      4: Distance Mid,
+      5: Distance High,
+      6: Drive Length (0.01 meters, max = 2.55m), CSAFE_PM_GET_STROKESTATS
+      7: Drive Time (0.01 sec, max = 2.55 sec),
+      8: Stroke Recovery Time Lo (0.01 sec, max = 655.35 sec), CSAFE_PM_GET_STROKESTATS
+      9: Stroke Recovery Time Hi, CSAFE_PM_GET_STROKESTATS8
+      10: Stroke Distance Lo (0.01 m, max=655.35m), CSAFE_PM_GET_STROKESTATS
+      11: Stroke Distance Hi,
+      12: Peak Drive Force Lo (0.1 lbs of force, max=6553.5m), CSAFE_PM_GET_STROKESTATS
+      13: Peak Drive Force Hi,
+      14: Average Drive Force Lo (0.1 lbs of force, max=6553.5m), CSAFE_PM_GET_STROKESTATS
+      15: Average Drive Force Hi,
+      16: Work Per Stroke Lo (0.1 Joules, max=6553.5 Joules), CSAFE_PM_GET_STROKESTATS
+      17: Work Per Stroke Hi
+      18: Stroke Count Lo, CSAFE_PM_GET_STROKESTATS
+      19: Stroke Count Hi,
+    */
+    const v = new Uint8Array(e.target.value.buffer);
+
+    return {
+      elapsedTime: this._byteBuilder(v[0], v[1], v[2]) * 0.01,
+      distance: this._byteBuilder(v[3], v[4], v[5]) * 0.1,
+      driveLength: this._byteBuilder(v[6]) * 0.01,
+      driveTime: this._byteBuilder(v[7]) * 0.01,
+      strokeRecoveryTime: this._byteBuilder(v[8], v[9]) * 0.01,
+      strokeDistance: this._byteBuilder(v[10], v[11]) * 0.01,
+      peakDriveForce: this._byteBuilder(v[12], v[13]) * 0.1,
+      averageDriveForce: this._byteBuilder(v[14], v[15]) * 0.1,
+      workPerStroke: this._byteBuilder(v[16], v[17]) * 0.1,
+      strokeCount: this._byteBuilder(v[18], v[19])
+    };
+  }
+
   _addStrokeDataListener() {
     return this._setupCharacteristicValueListener(
       characteristics.rowingService.strokeData, (pm5, e) => {
         const valueArray = new Uint8Array(e.target.value.buffer);
-        // const ...info?
+
+        const peakDriveForce = _byteBuilder(valueArray[12], valueArray[13]);
+        const strokeCount = _byteBuilder(valueArray[18], valueArray[19]);
+        const driveLength = _byteBuilder(valueArray[6], valueArray[7]);
+
         const event = {
           type: 'stroke-data',
           source: pm5,
           raw: e.target.value,
-          data: {
-            // TODO
+          data: this._parseStrokeDataBuffer(e.target.value.buffer),
+          oldData: {
+            peakDriveForce: peakDriveForce,
+            strokeCount: strokeCount,
+            driveLength: driveLength,
           }
         };
         pm5.eventTarget.dispatchEvent(event);
       }
-    )
+    );
+  }
+
+  _byteBuilder(lo = 0, mid = 0, hi = 0) {
+    return lo + (mid * MID_MULTIPLIER) + (hi * HIGH_MULTIPLIER);
   }
 
   _getStringCharacteristicValue(characteristic) {

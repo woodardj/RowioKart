@@ -1,5 +1,5 @@
 # Rowing Monitor
-
+(Copied from [a google example of web-bluetooth](https://github.com/GoogleChromeLabs/rowing-monitor))
 The Rowing Monitor is a [Progressive Web App](https://developers.google.com/web/#progressive-web-apps)
 that uses [Web Bluetooth](https://webbluetoothcg.github.io/web-bluetooth/) to connect to a 
 [PM5 Monitor](http://www.concept2.com/service/monitors/pm5) and tracking exercises.

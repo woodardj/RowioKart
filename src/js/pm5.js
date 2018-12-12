@@ -233,6 +233,7 @@ export default class PM5 {
 
   _parseGeneralStatusBuffer(buffer) {
     /*
+      From page 11 of the manual
       Data bytes packed as follows:
       0: Elapsed Time Lo (0.01 sec lsb),
       1: Elapsed Time Mid,
@@ -254,7 +255,7 @@ export default class PM5 {
       17: Workout Duration Type (enum), CSAFE_PM_GET_WORKOUTDURA TION
       18: Drag Factor CSAFE_PM_GET_DRAGFACTOR
     */
-    const v = new Uint8Array(e.target.value.buffer);
+    const v = new Uint8Array(buffer);
 
     return {
       timeElapsed: this._byteBuilder(v[0], v[1], v[2]) * 0.01,
@@ -275,8 +276,8 @@ export default class PM5 {
     return this._setupCharacteristicValueListener(
       characteristics.rowingService.generalStatus, (pm5, e) => {
         const valueArray = new Uint8Array(e.target.value.buffer);
-        const timeElapsed = _byteBuilder(valueArray[0], valueArray[1], valueArray[2]) * 0.01;
-        const distance = _byteBuilder(valueArray[3], valueArray[4], valueArray[5]) * 0.1;
+        const timeElapsed = this._byteBuilder(valueArray[0], valueArray[1], valueArray[2]) * 0.01;
+        const distance = this._byteBuilder(valueArray[3], valueArray[4], valueArray[5]) * 0.1;
         // const timeElapsed = (valueArray[0] + (valueArray[1] * MID_MULTIPLIER)
         //     + (valueArray[2] * HIGH_MULTIPLIER)) * 0.01;
         // const distance = (valueArray[3] + (valueArray[4] * MID_MULTIPLIER)
@@ -303,6 +304,7 @@ export default class PM5 {
 
   _parseStrokeDataBuffer(buffer) {
     /*
+      From page 15 of the manual
       Data bytes packed as follows:
       0: Elapsed Time Lo (0.01 sec lsb),
       1: Elapsed Time Mid,
@@ -325,7 +327,7 @@ export default class PM5 {
       18: Stroke Count Lo, CSAFE_PM_GET_STROKESTATS
       19: Stroke Count Hi,
     */
-    const v = new Uint8Array(e.target.value.buffer);
+    const v = new Uint8Array(buffer);
 
     return {
       elapsedTime: this._byteBuilder(v[0], v[1], v[2]) * 0.01,
@@ -346,9 +348,9 @@ export default class PM5 {
       characteristics.rowingService.strokeData, (pm5, e) => {
         const valueArray = new Uint8Array(e.target.value.buffer);
 
-        const peakDriveForce = _byteBuilder(valueArray[12], valueArray[13]);
-        const strokeCount = _byteBuilder(valueArray[18], valueArray[19]);
-        const driveLength = _byteBuilder(valueArray[6], valueArray[7]);
+        const peakDriveForce = this._byteBuilder(valueArray[12], valueArray[13]);
+        const strokeCount = this._byteBuilder(valueArray[18], valueArray[19]);
+        const driveLength = this._byteBuilder(valueArray[6], valueArray[7]);
 
         const event = {
           type: 'stroke-data',

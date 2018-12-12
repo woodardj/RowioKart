@@ -111,7 +111,7 @@ class App {
           console.log(evt);
           console.log(evt.data);
           // TODO: Update a rowing guy animation based on this info.
-          this.strokeStateText = evt.data.strokeState;
+          document.querySelector('#stroke-state').textContent = evt.data.strokeState;
           const date = new Date(evt.data.timeElapsed * 1000);
           this.timeText.textContent = formatTime(date);
           this.distanceText.textContent = (evt.data.distance).toFixed(2);
@@ -122,7 +122,7 @@ class App {
           console.log(evt);
           console.log(evt.data);
           // TODO: Update a rowing guy animation based on this info.
-          this.peakDriveForceText = evt.data.peakDriveForce;
+          document.querySelector('#peak-power').textContent = evt.data.peakDriveForce;
         });
       })
       .then(() => {

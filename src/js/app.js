@@ -77,7 +77,7 @@ class App {
     this.distanceText = document.querySelector('#distance');
     this.strokeStateText = document.querySelector('#stroke-state');
     this.peakDriveForceText = document.querySelector('#peak-power');
-    this.fillLogbook();
+    // this.fillLogbook();
 
     WebFont.load({
       google: {
@@ -126,17 +126,20 @@ class App {
         });
       })
       .then(() => {
+        return this.pm5.setSampleRate(3);
+      })
+      .then(() => {
         return this.pm5.addEventListener('workout-end', evt => {
-          this.logbook.saveWorkout(evt.data)
-            .then(workout => {
-              this.addWorkout(workout);
-              // TODO: Show Toast here!
-              console.log('Workout Saved');
-            })
-            .catch(err => {
-              // TODO: Show Toast here!
-              console.error('Error Saving Workout', err);
-            });
+          // this.logbook.saveWorkout(evt.data)
+          //   .then(workout => {
+          //     this.addWorkout(workout);
+          //     // TODO: Show Toast here!
+          //     console.log('Workout Saved');
+          //   })
+          //   .catch(err => {
+          //     // TODO: Show Toast here!
+          //     console.error('Error Saving Workout', err);
+          //   });
         });
       })
       .then(() => {
@@ -167,24 +170,24 @@ class App {
     this._addWorkout(workoutTable, rowtemplate, workout);
   }
 
-  fillLogbook() {
-    this.logbook.loadWorkouts()
-      .then(workouts => {
-        if (workouts.length <= 0) {
-          return;
-        }
-
-        const rowtemplate = document.querySelector('#logbook-record').content;
-        const workoutTable = document.querySelector('.logbook-records');
-        workouts
-          .sort((workoutA, workoutB) => workoutB.date - workoutA.date)
-          .forEach(workout => {
-            this._addWorkout(workoutTable, rowtemplate, workout);
-          });
-        const noWorkout = document.querySelector('.no-workout');
-        noWorkout.classList.add('no-workout_hidden');
-      });
-  }
+  // fillLogbook() {
+  //   this.logbook.loadWorkouts()
+  //     .then(workouts => {
+  //       if (workouts.length <= 0) {
+  //         return;
+  //       }
+  //
+  //       const rowtemplate = document.querySelector('#logbook-record').content;
+  //       const workoutTable = document.querySelector('.logbook-records');
+  //       workouts
+  //         .sort((workoutA, workoutB) => workoutB.date - workoutA.date)
+  //         .forEach(workout => {
+  //           this._addWorkout(workoutTable, rowtemplate, workout);
+  //         });
+  //       const noWorkout = document.querySelector('.no-workout');
+  //       noWorkout.classList.add('no-workout_hidden');
+  //     });
+  // }
 }
 
 const app = new App();

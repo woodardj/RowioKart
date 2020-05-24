@@ -52,7 +52,8 @@ const characteristics = {
       service: services.rowing
     },
     dataRate: {
-      id: 'CE060034-43E5-11E4-916C-0800200C9A66',
+      id: 'ce060034-43e5-11e4-916c-0800200c9a66', // ce060034-43e5-11e4-916c-0800200c9a66
+      // id: 'ce060034-43e5-11e4-916c-0800200c9A66',
       service: services.rowing
     },
     strokeData: {
@@ -381,6 +382,22 @@ export default class PM5 {
       .then(value => {
         return decoder.decode(value);
       });
+  }
+
+  setSampleRate(value) {
+    // Determines how often slave sends general status and additional status data as notifications. Set rate as follows:
+    // 0 – 1 sec
+    // 1 - 500ms (default if characteristic is not explicitly set by the app)
+    // 2 – 250ms
+    // 3 – 100ms
+    return this._getCharacteristic(characteristics.rowingService.dataRate)
+        .then((c) => {
+          const buffer = new ArrayBuffer(1);
+          const view = new DataView(buffer);
+          view.setInt8(0, value);
+          console.log("here goes nothing, setting to " + value);
+          return c.writeValue(buffer);
+        })
   }
 
   getFirmwareVersion() {

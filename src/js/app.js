@@ -77,6 +77,7 @@ class App {
     this.distanceText = document.querySelector('#distance');
     this.strokeStateText = document.querySelector('#stroke-state');
     this.peakDriveForceText = document.querySelector('#peak-power');
+    this.myBoat = document.querySelector('#myBoat');
     // this.fillLogbook();
 
     WebFont.load({
@@ -115,6 +116,29 @@ class App {
           const date = new Date(evt.data.timeElapsed * 1000);
           this.timeText.textContent = formatTime(date);
           this.distanceText.textContent = (evt.data.distance).toFixed(2);
+
+          this.myBoat.style.setProperty("left", evt.data.distance + "px");
+          let color = "#fff";
+          switch(evt.data.strokeState){
+            case 0:
+            case 1:
+              color = "#fff";
+              break;
+            case 2:
+              // STROKESTATE_DRIVING_STATE
+              color = "#f00";
+              break;
+            case 3:
+              // STROKESTATE_DWELLING_AFTER_DRIVE_STATE
+              color = "#f0f";
+              break;
+            case 4:
+              // STROKESTATE_RECOVERY_STATE
+              color = "#00f";
+              break;
+          }
+          this.myBoat.style.setProperty("background-color", color);
+
         });
       })
       .then(() => {
@@ -122,7 +146,12 @@ class App {
           console.log(evt);
           console.log(evt.data);
           // TODO: Update a rowing guy animation based on this info.
-          document.querySelector('#peak-power').textContent = evt.data.peakDriveForce;
+          const pdf = evt.data.peakDriveForce;
+          // const hexVal = (255 - pdf).toString(16);
+          document.querySelector('#peak-power').textContent = pdf;
+          // const color = "#ff" + hexVal + hexVal;
+          // console.log("*** COLOR! " + color);
+          // this.myBoat.style.setProperty("background-color", color);
         });
       })
       .then(() => {

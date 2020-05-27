@@ -20,6 +20,13 @@ import Logbook from './logbook';
 import {formatDate, formatTime} from './utils';
 import WebFont from 'webfontloader';
 
+
+// Some other possible resources:
+// https://github.com/tijmenvangulik/ErgometerJS
+// https://bandarra.me/2017/02/20/Fitness-Tracking-with-Web-Bluetooth/
+// https://ergometer-space.org/
+
+
 class App {
   constructor() {
   }

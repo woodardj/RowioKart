@@ -16,7 +16,7 @@
     "del": "^2.2.2",
     "eslint": "^10.14.0",
     "eslint-config-google": "^0.7.1",
-    "gulp": "^3.9.1",
+    "gulp": "^5.0.1",
     "gulp-debug": "^3.0.0",
     "gulp-eslint": "^3.0.1",
     "gulp-filter": "^4.0.0",
